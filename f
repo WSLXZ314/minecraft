@@ -1,0 +1,31 @@
+/.github/workflows/build.yml
+name: Build Ancient Extra
+on:
+  push:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v3
+      - name: Unzip source
+        run: |
+          mkdir -p project
+          unzip -q ancientextra-src.zip -d project
+          ls -la project
+      - name: Make gradlew executable
+        run: chmod +x project/gradlew
+      - name: Build
+        working-directory: project
+        run: ./gradlew build --no-daemon --stacktrace
+      - name: Upload jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: ancientextra-jar
+          path: project/build/libs/*.jar
+          if-no-files-found: error
